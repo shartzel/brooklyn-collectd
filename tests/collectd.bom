@@ -1,0 +1,128 @@
+brooklyn.catalog:
+  version: "0.1"
+  items:
+    - "https://raw.githubusercontent.com/brooklyncentral/common-catalog-utils/master/common-tests/src/main/resources/commontests/common.tests.bom"
+    - id: test-rrd-metric-dir-exists
+      item:
+        type: test-ssh-succeeds
+        name: "Check Plugin Dir Exists"
+        brooklyn.parameters:
+          - name: metric.directory.grep.name
+            description: Name of metric directory to match
+            type: string
+        brooklyn.config:
+          command:
+            $brooklyn:formatString:
+              - "ls %s/%s| grep %s"
+              - $brooklyn:component("collectd-server").config("collectd.plugins.rrdtool.datadir")
+              - $brooklyn:component("collectd-client").attributeWhenReady("host.subnet.address")
+              - $brooklyn:config("metric.directory.grep.name")
+    - id: collectd-tests
+      version: "0.1"
+      itemType: template
+      iconUrl: "https://collectd.org/images/table-blue/collectd.png"
+      name: "Collectd Tests"
+      item:
+        services:
+        - type: 'collectd:0.1'
+          id: collectd-server
+          name: CollectdServer
+          brooklyn.config:
+            collectd.plugins.rrdtool.enable: true
+            collectd.plugins.network.enable: true
+            collectd.plugins.network.listen.enable: true
+            collectd.plugins.network.listen.address: $brooklyn:attributeWhenReady("host.subnet.address")
+          brooklyn.initializers:
+          - type: org.apache.brooklyn.core.effector.ssh.SshCommandEffector
+            brooklyn.config:
+              name: checkStatsDelivery
+              description: |
+                Lists the directories in the RRDtool storage directory. 
+              command: |
+                ls ${PLUGINS_RRDTOOL_DATADIR}
+        - type: 'collectd:0.1'
+          id: collectd-client
+          name: CollectdClient
+          brooklyn.config:
+            collectd.plugins.network.enable: true
+            collectd.plugins.network.server.enable: true
+            collectd.plugins.network.server.address: $brooklyn:component("collectd-server").attributeWhenReady("host.subnet.address")
+            collectd.plugins.disk.enable: true
+            collectd.plugins.processes.enable: true
+            collectd.plugins.protocols.enable: true
+        - type: test-case
+          name: "Collectd Client Tests"
+          brooklyn.config:
+            timeout: 1h
+            targetId: collectd-client
+            process.grep.name: "/usr/sbin/[c]ollectd"
+          brooklyn.children:
+          - type: assert-up-and-running-initial
+            name: "01. Collectd up and running"
+          - type: assert-restart-process
+            name: "02. Collectd restart process"
+          - type: assert-stop-and-restart-process
+            name: "03. Collectd stop and restart process"
+        - type: test-case
+          name: "Collectd Server Tests"
+          brooklyn.config:
+            timeout: 1h
+            targetId: collectd-server
+            process.grep.name: "/usr/sbin/[c]ollectd"
+          brooklyn.children:
+          - type: assert-up-and-running-initial
+            name: "01. Collectd up and running"
+          - type: assert-restart-process
+            name: "02. Collectd restart process"
+          - type: assert-stop-and-restart-process
+            name: "03. Collectd stop and restart process"
+          - type: invoke-effector
+            name: "04. Check delivery of client data"
+            brooklyn.config:
+              targetId: collectd-server
+              effector: checkStatsDelivery
+              timeout: 10m
+              assert:
+                - contains: $brooklyn:component("collectd-client").attributeWhenReady("host.subnet.address")
+          - type: test-rrd-metric-dir-exists
+            name: "05. Check plugin cpu"
+            brooklyn.config:
+              timeout: 10m
+              metric.directory.grep.name: cpu
+              targetId: collectd-server
+          - type: test-rrd-metric-dir-exists
+            name: "06. Check plugin load"
+            brooklyn.config:
+              timeout: 10m
+              metric.directory.grep.name: load
+              targetId: collectd-server
+          - type: test-rrd-metric-dir-exists
+            name: "07. Check plugin memory"
+            brooklyn.config:
+              timeout: 10m
+              metric.directory.grep.name: memory
+              targetId: collectd-server
+          - type: test-rrd-metric-dir-exists
+            name: "08. Check plugin disk"
+            brooklyn.config:
+              timeout: 10m
+              metric.directory.grep.name: disk
+              targetId: collectd-server
+          - type: test-rrd-metric-dir-exists
+            name: "09. Check plugin processes"
+            brooklyn.config:
+              timeout: 10m
+              metric.directory.grep.name: processes
+              targetId: collectd-server
+          - type: test-rrd-metric-dir-exists
+            name: "10. Check plugin protocols"
+            brooklyn.config:
+              timeout: 10m
+              metric.directory.grep.name: protocols
+              targetId: collectd-server
+          - type: test-rrd-metric-dir-exists
+            name: "11. Check plugin interface"
+            brooklyn.config:
+              timeout: 10m
+              metric.directory.grep.name: interface
+              targetId: collectd-server
