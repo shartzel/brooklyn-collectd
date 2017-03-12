@@ -77,6 +77,8 @@ brooklyn.catalog:
           - type: assert-stop-and-restart-process
             name: "03. Collectd stop and restart process"
           - type: invoke-effector
+            # Verifies that the network plugin is working for both client and
+            # server, and that rrdtool plugin is working on server
             name: "04. Check delivery of client data"
             brooklyn.config:
               targetId: collectd-server

@@ -69,7 +69,7 @@
             Meant to be used for enabling and configuring plugins not
             exposed in the blueprint.
         ###
-        # Plugins that are enabled by the default collectd.conf are enabled
+        # Plugins that are enabled in the default collectd.conf are enabled
         # by default here. Plugins that otherwise commonly used and tested
         # working are included as config options, but disabled by default
         ###
@@ -269,7 +269,6 @@
               </Plugin>
           END_OF_RRDTOOL_PLUGIN
           fi
-
           }
 
           _configure_syslog_plugin() {
