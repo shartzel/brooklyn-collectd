@@ -1,0 +1,387 @@
+  brooklyn.catalog:
+    version: "0.1"
+    id: collectd
+    name: Collectd
+    iconUrl: "https://collectd.org/images/table-blue/collectd.png"
+    itemType: entity
+    description: |
+      Collectd - The system statistics collection daemon
+    publish:
+      license_code: Apache-2.0
+      overview: README.md
+    item:
+      type: centos-software-process
+      name: Collectd
+      brooklyn.parameters:
+        - name: collectd.configfile
+          label: "Collectd Configuration File"
+          default: /etc/collectd.conf
+          description: |
+            Path to configuration file
+          pinned: false
+        - name: collectd.fqdnlookup
+          default: true
+          pinned: false
+        - name: collectd.basedir
+          default: /var/lib/collectd
+          pinned: false
+        - name: collectd.pidfile
+          default: /var/run/collectd.pid
+          pinned: false
+        - name: collectd.plugindir
+          default: /usr/lib64/collectd
+          pinned: false
+        - name: collectd.typesdb
+          default: /usr/share/collectd/types.db
+          pinned: false
+        - name: collectd.autoloadplugins
+          default: false
+          pinned: false
+        - name: collectd.collectinternalstats
+          default: false
+          pinned: false
+        - name: collectd.interval
+          default: 10
+          pinned: false
+        - name: collectd.maxreadinterval
+          default: 86400
+          pinned: false
+        - name: collectd.timeout
+          default: 2
+          pinned: false
+        - name: collectd.readthreads
+          default: 5
+          pinned: false
+        - name: collectd.writethreads
+          default: 5
+          pinned: false
+        - name: collectd.writequeuelimithigh
+          default: 0
+          pinned: false
+        - name: collectd.writequeuelimitlow
+          default: 0
+          pinned: false
+        - name: collectd.configurl
+          label: "Configuration Download URL"
+          default: ""
+          description: |
+            URL to a file to be downloaded and appended to collectd.conf.
+            Meant to be used for enabling and configuring plugins not
+            exposed in the blueprint.
+        ###
+        # Plugins that are enabled in the default collectd.conf are enabled
+        # by default here. Plugins that otherwise commonly used and tested
+        # working are included as config options, but disabled by default
+        ###
+        - name: collectd.plugins.syslog.enable
+          label: "Enable syslog"
+          default: true
+          type: boolean
+          description: |
+            Enable syslog plugin
+          pinned: false
+        - name: collectd.plugins.rrdtool.enable
+          label: "Enable RRD tool persistance"
+          default: false
+          type: boolean
+          description: |
+            Enable persisting collectd data via RRDtool
+          pinned: false
+        - name: collectd.plugins.rrdtool.datadir
+          label: "RRD Storage Directory"
+          default: /var/lib/collectd/rrd
+          description: |
+            Directory for persisting RRD data
+          pinned: false
+        - name: collectd.plugins.rrdtool.createfilesasync
+          default: false
+          type: boolean
+          pinned: false
+        - name: collectd.plugins.rrdtool.cachetimeout
+          default: 120
+          pinned: false
+        - name: collectd.plugins.rrdtool.cacheflush
+          default: 900
+          pinned: false
+        - name: collectd.plugins.rrdtool.writespersecond
+          default: 50
+          pinned: false
+        - name: collectd.plugins.cpu.enable
+          label: "Enable CPU Plugin"
+          default: true
+          type: boolean
+          pinned: false
+        - name: collectd.plugins.interface.enable
+          label: "Enable Network Interfaces Plugin"
+          default: true
+          type: boolean
+          pinned: false
+        - name: collectd.plugins.load.enable
+          label: "Enable Load Plugin"
+          default: true
+          type: boolean
+          pinned: false
+        - name: collectd.plugins.memory.enable
+          label: "Enable Memory Plugin"
+          default: true
+          type: boolean
+          pinned: false
+        - name: collectd.plugins.network.enable
+          label: "Enable Network Plugin"
+          default: false
+          type: boolean
+          pinned: false
+        - name: collectd.plugins.network.listen.enable
+          label: "Configure Network Plugin to Listen"
+          default: false
+          type: boolean
+          pinned: false
+        - name: collectd.plugins.network.listen.address
+          label: "Network Plugin Listen Address"
+          default: "*"
+          description: |
+            Address of interface on which to listen
+          pinned: false
+        - name: collectd.plugins.network.listen.port
+          label: "Configure Port on which Network Plugin listens"
+          default: "25826"
+          description: |
+            Port on which to listen
+          pinned: false
+        - name: collectd.plugins.network.server.enable
+          label: "Configure Network Plugin to Deliver to a Server"
+          default: false
+          type: boolean
+        - name: collectd.plugins.network.server.address
+          label: "Address of server to which data should be sent"
+          default: ""
+          description: |
+            Address of server which should receive this collectd data
+        - name: collectd.plugins.network.server.port
+          label: "Server Port"
+          default: "25826"
+          description: |
+            Port on server which should receive this collectd data
+        - name: collectd.plugins.disk.enable
+          label: "Enable Disk Plugin"
+          default: false
+          type: boolean
+          pinned: false
+        - name: collectd.plugins.processes.enable
+          label: "Enable Processes Plugin"
+          default: false
+          type: boolean
+          pinned: false
+        - name: collectd.plugins.protocols.enable
+          label: "Enable Protocols Plugin"
+          default: false
+          type: boolean
+          pinned: false
+
+      brooklyn.config:
+        shell.env:
+          INSTALL_DIR: $brooklyn:attributeWhenReady("install.dir")
+          CONFIG_FILE: $brooklyn:config("collectd.configfile")
+          HOST: $brooklyn:attributeWhenReady("host.name")
+          FQDNLOOKUP: $brooklyn:config("collectd.fqdnlookup")
+          BASEDIR: $brooklyn:config("collectd.basedir")
+          PIDFILE: $brooklyn:config("collectd.pidfile")
+          PLUGINDIR: $brooklyn:config("collectd.plugindir")
+          TYPESDB: $brooklyn:config("collectd.typesdb")
+          AUTOLOADPLUGIN: $brooklyn:config("collectd.autoloadplugins")
+          COLLECTINTERNALSTATS: $brooklyn:config("collectd.collectinternalstats")
+          INTERVAL: $brooklyn:config("collectd.interval")
+          MAXREADINTERVAL: $brooklyn:config("collectd.maxreadinterval")
+          TIMEOUT: $brooklyn:config("collectd.timeout")
+          READTHREADS: $brooklyn:config("collectd.readthreads")
+          WRITETHREADS: $brooklyn:config("collectd.writethreads")
+          WRITEQUEUELIMITHIGH: $brooklyn:config("collectd.writequeuelimithigh")
+          WRITEQUEUELIMITLOW: $brooklyn:config("collectd.writequeuelimitlow")
+          CONFIGURL: $brooklyn:config("collectd.configurl")
+          PLUGINS_SYSLOG_ENABLE: $brooklyn:config("collectd.plugins.syslog.enable")
+          PLUGINS_RRDTOOL_ENABLE: $brooklyn:config("collectd.plugins.rrdtool.enable")
+          PLUGINS_RRDTOOL_DATADIR: $brooklyn:config("collectd.plugins.rrdtool.datadir")
+          PLUGINS_RRDTOOL_CREATEFILESASYNC: $brooklyn:config("collectd.plugins.rrdtool.createfilesasync")
+          PLUGINS_RRDTOOL_CACHETIMEOUT: $brooklyn:config("collectd.plugins.rrdtool.cachetimeout")
+          PLUGINS_RRDTOOL_CACHEFLUSH: $brooklyn:config("collectd.plugins.rrdtool.cacheflush")
+          PLUGINS_RRDTOOL_WRITESPERSECOND: $brooklyn:config("collectd.plugins.rrdtool.writespersecond")
+          PLUGINS_CPU_ENABLE: $brooklyn:config("collectd.plugins.cpu.enable")
+          PLUGINS_INTERFACE_ENABLE: $brooklyn:config("collectd.plugins.interface.enable")
+          PLUGINS_LOAD_ENABLE: $brooklyn:config("collectd.plugins.load.enable")
+          PLUGINS_MEMORY_ENABLE: $brooklyn:config("collectd.plugins.memory.enable")
+          PLUGINS_NETWORK_ENABLE: $brooklyn:config("collectd.plugins.network.enable")
+          PLUGINS_NETWORK_LISTEN_ENABLE: $brooklyn:config("collectd.plugins.network.listen.enable")
+          PLUGINS_NETWORK_LISTEN_ADDRESS: $brooklyn:config("collectd.plugins.network.listen.address")
+          PLUGINS_NETWORK_LISTEN_PORT: $brooklyn:config("collectd.plugins.network.listen.port")
+          PLUGINS_NETWORK_SERVER_ENABLE: $brooklyn:config("collectd.plugins.network.server.enable")
+          PLUGINS_NETWORK_SERVER_ADDRESS: $brooklyn:config("collectd.plugins.network.server.address")
+          PLUGINS_NETWORK_SERVER_PORT: $brooklyn:config("collectd.plugins.network.server.port")
+          PLUGINS_DISK_ENABLE: $brooklyn:config("collectd.plugins.disk.enable")
+          PLUGINS_PROCESSES_ENABLE: $brooklyn:config("collectd.plugins.processes.enable")
+          PLUGINS_PROTOCOLS_ENABLE: $brooklyn:config("collectd.plugins.protocols.enable")
+    
+        pre.install.command: |
+          sudo yum update -y
+    
+        install.command: |
+          sudo yum install -y epel-release
+          sudo yum install -y collectd
+          sudo systemctl enable collectd
+          
+          if ${PLUGINS_RRDTOOL_ENABLE:-false} ; then
+              sudo yum install -y collectd-rrdtool
+          fi
+
+          # Write utility functions
+          cat <<'END_OF_FUNCTIONS'>> ${INSTALL_DIR}/collectd_functions.sh
+         
+          _write_collectd_initial_config() {
+          sudo -E tee ${CONFIG_FILE} <<-EOF_CONFIGURATION
+          Hostname             "${HOST}"
+          FQDNLookup           "${FQDNLOOKUP}"
+          BaseDir              "${BASEDIR}"
+          PIDFile              "${PIDFILE}"
+          PluginDir            "${PLUGINDIR}"
+          TypesDB              "${TYPESDB}"
+          AutoLoadPlugin       ${AUTOLOADPLUGIN}
+          CollectInternalStats ${COLLECTINTERNALSTATS}
+          Interval             ${INTERVAL}
+          MaxReadInterval      ${MAXREADINTERVAL}
+          Timeout              ${TIMEOUT}
+          ReadThreads          ${READTHREADS}
+          WriteThreads         ${WRITETHREADS}
+          WriteQueueLimitHigh  ${WRITEQUEUELIMITHIGH}
+          WriteQueueLimitLow   ${WRITEQUEUELIMITLOW}
+          
+          EOF_CONFIGURATION
+          }
+
+          _configure_rrdtool_plugin() {
+          if ${PLUGINS_RRDTOOL_ENABLE:-false} ; then
+              sudo -E tee -a ${CONFIG_FILE} <<-END_OF_RRDTOOL_PLUGIN
+              LoadPlugin rrdtool
+              <Plugin rrdtool>
+                 DataDir "${PLUGINS_RRDTOOL_DATADIR}"
+                 CreateFilesAsync ${PLUGINS_RRDTOOL_CREATEFILESASYNC}
+                 CacheTimeout ${PLUGINS_RRDTOOL_CACHETIMEOUT}
+                 CacheFlush ${PLUGINS_RRDTOOL_CACHEFLUSH}
+                 WritesPerSecond ${PLUGINS_RRDTOOL_WRITESPERSECOND}
+              </Plugin>
+          END_OF_RRDTOOL_PLUGIN
+          fi
+          }
+
+          _configure_syslog_plugin() {
+          if ${PLUGINS_SYSLOG_ENABLE:-false} ; then
+              echo "LoadPlugin syslog" | sudo -E tee -a ${CONFIG_FILE};
+          fi
+          }
+
+          _configure_cpu_plugin() {
+          if ${PLUGINS_CPU_ENABLE:-false} ; then
+              echo "LoadPlugin cpu" | sudo -E tee -a ${CONFIG_FILE};
+          fi
+          }
+
+          _configure_interface_plugin() {
+          if ${PLUGINS_INTERFACE_ENABLE:-false} ; then
+              echo "LoadPlugin interface" | sudo -E tee -a ${CONFIG_FILE};
+          fi
+          }
+
+          _configure_load_plugin() {
+          if ${PLUGINS_LOAD_ENABLE:-false} ; then
+              echo "LoadPlugin load" | sudo -E tee -a ${CONFIG_FILE};
+          fi
+          }
+
+          _configure_memory_plugin() {
+          if ${PLUGINS_MEMORY_ENABLE:-false} ; then
+              echo "LoadPlugin memory" | sudo -E tee -a ${CONFIG_FILE};
+          fi
+          }
+
+          _configure_network_plugin() {
+          if ${PLUGINS_NETWORK_ENABLE:-false} ; then
+              echo "LoadPlugin network" | sudo -E tee -a ${CONFIG_FILE}
+              echo "<Plugin network>" | sudo -E tee -a ${CONFIG_FILE}
+              if ${PLUGINS_NETWORK_LISTEN_ENABLE:-false} ; then
+                  echo "    Listen \"${PLUGINS_NETWORK_LISTEN_ADDRESS}\" \"${PLUGINS_NETWORK_LISTEN_PORT}\"" | sudo -E tee -a ${CONFIG_FILE};
+              fi
+              if ${PLUGINS_NETWORK_SERVER_ENABLE:-false} ; then
+                  echo "    Server \"${PLUGINS_NETWORK_SERVER_ADDRESS}\" \"${PLUGINS_NETWORK_SERVER_PORT}\"" | sudo -E tee -a ${CONFIG_FILE};
+              fi
+              echo "</Plugin>" | sudo -E tee -a ${CONFIG_FILE};
+          fi
+          }
+
+          _configure_disk_plugin() {
+          if ${PLUGINS_DISK_ENABLE:-false} ; then
+              echo "LoadPlugin disk" | sudo -E tee -a ${CONFIG_FILE};
+          fi
+          }
+
+          _configure_processes_plugin() {
+          if ${PLUGINS_PROCESSES_ENABLE:-false} ; then
+              echo "LoadPlugin processes" | sudo -E tee -a ${CONFIG_FILE};
+          fi
+          }
+
+          _configure_protocols_plugin() {
+          if ${PLUGINS_PROTOCOLS_ENABLE:-false} ; then
+              echo "LoadPlugin protocols" | sudo -E tee -a ${CONFIG_FILE};
+          fi
+          }
+
+          _append_configurl_contents() {
+          if [[ ! -z "${CONFIGURL}" ]] ; then
+              curl ${CONFIGURL} | sudo -E tee -a ${CONFIG_FILE};
+          fi
+          }
+
+          _ensure_newline_at_end() {
+          # Ensure there is a newline at the end of the file, or collectd
+          # will not start
+          sudo sed -i -e '$a\' ${CONFIG_FILE}
+          }
+          
+          _configure_plugins() {
+            # Syslog should be loaded first
+            _configure_syslog_plugin
+            _configure_rrdtool_plugin
+            _configure_cpu_plugin
+            _configure_interface_plugin
+            _configure_load_plugin
+            _configure_memory_plugin
+            _configure_network_plugin
+            _configure_disk_plugin
+            _configure_processes_plugin
+            _configure_protocols_plugin
+            _append_configurl_contents
+            _ensure_newline_at_end
+          }
+
+          END_OF_FUNCTIONS
+
+        customize.command: |
+          source ${INSTALL_DIR}/collectd_functions.sh
+          _write_collectd_initial_config
+          _configure_plugins
+
+        launch.command: |
+          sudo systemctl start collectd
+    
+        checkRunning.command: |
+          pgrep collectd
+
+        stop.command: |
+          sudo systemctl stop collectd
+      
+      brooklyn.initializers:
+      - type: org.apache.brooklyn.core.effector.ssh.SshCommandEffector
+        brooklyn.config:
+          name: collectdFlush
+          description: |
+            signal all plugins to flush data from internal caches
+          command: |
+            pkill --signal USR1 collectd
